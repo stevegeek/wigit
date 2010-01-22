@@ -1,12 +1,14 @@
-<?php 
+<?php
 
-	/* 
+	/*
 	 * WiGit
 	 * (c) Remko Tronçon (http://el-tramo.be)
 	 * See COPYING for details
 	 */
+session_start();
 
-	require_once('classTextile.php');
+	//require_once('classTextile.php');
+	require_once('markdown.php');
 
 	// --------------------------------------------------------------------------
 	// Configuration
@@ -41,13 +43,13 @@
 			if (sizeof($logEntry) > 1) {
 				// Populate history structure
 				$historyItem = array(
-						"author" => $logEntry[2], 
+						"author" => $logEntry[2],
 						"email" => $logEntry[3],
 						"linked-author" => (
-								$logEntry[3] == "" ? 
-									$logEntry[2] 
+								$logEntry[3] == "" ?
+									$logEntry[2]
 									: "<a href=\"mailto:$logEntry[3]\">$logEntry[2]</a>"),
-						"date" => $logEntry[4], 
+						"date" => $logEntry[4],
 						"message" => $logEntry[5],
 						"commit" => $logEntry[0]
 					);
@@ -111,7 +113,7 @@
 		$gitCommand = "$GIT --git-dir=$gitDir --work-tree=$gitWorkTree $command";
 		$output = array();
 		$result;
-		// FIXME: Only do the escaping and the 2>&1 if we're not in safe mode 
+		// FIXME: Only do the escaping and the 2>&1 if we're not in safe mode
 		// (otherwise it will be escaped anyway).
 		// FIXME: Removed escapeShellCmd because it clashed with author.
 		$oldUMask = umask(0022);
@@ -141,11 +143,11 @@
 		$matches = array();
 		$page = "";
 		$type = "";
-		if (ereg("/(.*)/(.*)", $resource, $matches)) {
+		if (ereg("(.*)/(.*)", $resource, $matches)) {
 			$page = sanitizeName($matches[1]);
 			$type = $matches[2];
 		}
-		else if (ereg("/(.*)", $resource, $matches)) {
+		else if (ereg("(.*)", $resource, $matches)) {
 			$page = sanitizeName($matches[1]);
 		}
 		if ($page == "") {
@@ -154,6 +156,7 @@
 		if ($type == "") {
 			$type = "view";
 		}
+
 		return array("page" => $page, "type" => $type);
 	}
 
@@ -165,52 +168,43 @@
 	function wikify($text) {
 		global $SCRIPT_URL;
 
-		// FIXME: Do not apply this in <pre> and <notextile> blocks.
+		$text = Markdown($text);
 
-		// Linkify
-		$text = preg_replace('@([^:])(https?://([-\w\.]+)+(:\d+)?(/([%-\w/_\.]*(\?\S+)?)?)?)@', '$1<a href="$2">$2</a>', $text);
-
-		// WikiLinkify
-		$text = preg_replace('@\[([A-Z]\w+)\]@', '<a href="' . $SCRIPT_URL . '/$1">$1</a>', $text);
-		$text = preg_replace('@\[([A-Z]\w+)\|([\w\s]+)\]@', '<a href="' . $SCRIPT_URL . '/$1">$2</a>', $text);
-
-		// Textilify
-		$textile = new Textile();
-		return $textile->TextileThis($text);
+		return $text;
 	}
 
 	// --------------------------------------------------------------------------
 	// Utility functions (for use inside templates)
 	// --------------------------------------------------------------------------
-	
+
 	function getViewURL($page, $version = null) {
 		global $SCRIPT_URL;
 		if ($version) {
-			return "$SCRIPT_URL/$page/$version";
+			return "$SCRIPT_URL$page/$version";
 		}
 		else {
-			return "$SCRIPT_URL/$page";
+			return "$SCRIPT_URL$page";
 		}
 	}
 
 	function getPostURL() {
 		global $SCRIPT_URL;
 		$page = getPage();
-		return "$SCRIPT_URL/$page";
+		return "$SCRIPT_URL$page";
 	}
 
 	function getEditURL() {
 		global $SCRIPT_URL;
 		$page = getPage();
-		return "$SCRIPT_URL/$page/edit";
+		return "$SCRIPT_URL$page/edit";
 	}
 
 	function getHistoryURL() {
 		global $SCRIPT_URL;
 		$page = getPage();
-		return "$SCRIPT_URL/$page/history";
+		return "$SCRIPT_URL$page/history";
 	}
-	
+
 	function getGlobalHistoryURL() {
 		global $SCRIPT_URL;
 		return "$SCRIPT_URL/history";
@@ -218,7 +212,7 @@
 
 	function getHomeURL() {
 		global $SCRIPT_URL;
-		return "$SCRIPT_URL/";
+		return "$SCRIPT_URL";
 	}
 
 	function getUser() {
@@ -266,46 +260,53 @@
 	// --------------------------------------------------------------------------
 
 	$wikiUser = getHTTPUser();
-
 	$resource = parseResource($_GET['r']);
 	$wikiPage = $resource["page"];
 	$wikiSubPage = $resource["type"];
 	$wikiFile = $DATA_DIR . "/" . $wikiPage;
-
 
 	// --------------------------------------------------------------------------
 	// Process request
 	// --------------------------------------------------------------------------
 
 	if (isset($_POST['data'])) {
-		if (trim($_POST['data']) == "") {
-			// Delete
-			if (file_exists($wikiFile)) {
-				if (!git("rm $wikiPage")) { return; }
+	    $string = strtoupper($_SESSION['capstring']);
+        $userstring = strtoupper($_POST['capuserstring']);
+        if (($string == $userstring) && (strlen($string) > 4))
+        {
+            if (trim($_POST['data']) == "") {
+                // Delete
+                if (file_exists($wikiFile)) {
+                    if (!git("rm $wikiPage")) { return; }
 
-				$commitMessage = addslashes("Deleted $wikiPage");
-				$author = addslashes(getAuthorForUser(getUser()));
-				if (!git("commit --allow-empty --no-verify --message='$commitMessage' --author='$author'")) { return; }
-				if (!git("gc")) { return; }
-			}
-			header("Location: $wikiHome");
-			return;
-		}
-		else {
-			// Save
-			$handle = fopen($wikiFile, "w");
-			fputs($handle, stripslashes($_POST['data']));
-			fclose($handle);
+                    $commitMessage = addslashes("Deleted $wikiPage");
+                    $author = addslashes(getAuthorForUser(getUser()));
+                    if (!git("commit --allow-empty --no-verify --message='$commitMessage' --author='$author'")) { return; }
+                    if (!git("gc")) { return; }
+                }
+                header("Location: $wikiHome");
+                return;
+            }
+            else {
+                // Save
+                $handle = fopen($wikiFile, "w");
+                fputs($handle, stripslashes($_POST['data']));
+                fclose($handle);
 
-			$commitMessage = addslashes("Changed $wikiPage");
-			$author = addslashes(getAuthorForUser(getUser()));
-			if (!git("init")) { return; }
-			if (!git("add $wikiPage")) { return; }
-			if (!git("commit --allow-empty --no-verify --message='$commitMessage' --author='$author'")) { return; }
-			if (!git("gc")) { return; }
-			header("Location: " . getViewURL($wikiPage));
-			return;
-		}
+                $commitMessage = addslashes("Changed $wikiPage");
+                $author = addslashes(getAuthorForUser(getUser()));
+                if (!git("init")) { return; }
+                if (!git("add $wikiPage")) { return; }
+                if (!git("commit --allow-empty --no-verify --message='$commitMessage' --author='$author'")) { return; }
+                if (!git("gc")) { return; }
+                header("Location: " . getViewURL($wikiPage));
+                return;
+            }
+        } else {
+            // go back to edit
+            $wikiData = $_POST['data'];
+			include(getThemeDir() . "/edit.php");
+        }
 	}
 	// Get operation
 	else {
@@ -318,7 +319,7 @@
 		// Viewing
 		else if ($wikiSubPage == "view") {
 			if (!file_exists($wikiFile)) {
-				header("Location: " . $SCRIPT_URL . "/" . $resource["page"] . "/edit");
+				header("Location: " . $SCRIPT_URL . $resource["page"] . "/edit");
 				return;
 			}
 
