@@ -4,10 +4,12 @@
 	 * WiGit
 	 * (c) Remko Tronçon (http://el-tramo.be)
 	 * See COPYING for details
+	 *
+	 * Modifications: Stephen Ierodiaconou 2010
 	 */
-session_start();
 
-	//require_once('classTextile.php');
+    session_start();
+
 	require_once('markdown.php');
 
 	// --------------------------------------------------------------------------
@@ -24,8 +26,8 @@ session_start();
 	if (!isset($DATA_DIR)) { $DATA_DIR = "data"; }
 	if (!isset($DEFAULT_PAGE)) { $DEFAULT_PAGE = "Home"; }
 	if (!isset($DEFAULT_AUTHOR)) { $DEFAULT_AUTHOR = 'Anonymous <anonymous@wigit>'; }
-  if (!isset($AUTHORS)) { $AUTHORS = array(); }
-  if (!isset($THEME)) { $THEME = "default"; }
+    if (!isset($AUTHORS)) { $AUTHORS = array(); }
+    if (!isset($THEME)) { $THEME = "default"; }
 
 
 	// --------------------------------------------------------------------------
