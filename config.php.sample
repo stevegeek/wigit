@@ -1,34 +1,44 @@
 <?php
-	// Location of the Git binary
-	$GIT = "/usr/local/git/bin/git";
+    // Location of the Git binary
+    $GIT = "/usr/local/git/bin/git";
 
-	// Base URL of the wigit instalation. This will be prepended to all links
-	// to internal files.
-	$BASE_URL = "/wigit";
+    // Base URL of the wigit instalation. This will be prepended to all links
+    // to internal files.
+    $BASE_URL = "/wigit";
 
-	// The script to which all requests should be passed. The default is 
-	// $BASE_URL/index.php?r= , which should work on all installations. If you
-	// want to use pretty URLs, set this to $BASE_URL. (see README)
-	$SCRIPT_URL = "$BASE_URL/index.php?r=";
-	//$SCRIPT_URL = "$BASE_URL";
+    // The script to which all requests should be passed. The default is
+    // $BASE_URL/index.php?r= , which should work on all installations. If you
+    // want to use pretty URLs, set this to $BASE_URL. (see README)
+    $SCRIPT_URL = "$BASE_URL/index.php?r=";
+    //$SCRIPT_URL = "$BASE_URL";
 
-	// Title of the wiki
-	$TITLE = "WiGit";
+    // Title of the wiki
+    $TITLE = "WiGit";
 
-	// Home page. This page is linked in the navigation bar, and is the default
-	// page that will be opened.
-	$DEFAULT_PAGE = "Home";
+    // Home page. This page is linked in the navigation bar, and is the default
+    // page that will be opened.
+    $DEFAULT_PAGE = "Home";
 
-	// Dir that contains the data files (i.e. the Git repository). This directory
-	// must be writable by the web server.
-	$DATA_DIR = "data";
+    // Dir that contains the data files (i.e. the Git repository). This directory
+    // must be writable by the web server.
+    $DATA_DIR = "data";
 
-	// The default author of the git commits.
-	$DEFAULT_AUTHOR = 'Anonymous <anonymous@wigit>';
+    // Remote Repo. If you wish to have the option to push the local wiki git store to have
+    // a remote origin and be able to push to it on edits enable the following.
+    //$REMOTE_REPO = "http://path.to/repo.git";
 
-	// Set the mappings from HTTP username to Git commit author.
-  $AUTHORS = array(
-    "remko" => "Remko Tronçon <git@el-tramo.be>",
-    "guest" => "Guest <guest@el-tramo.be>"
-  );
+    // The default author of the git commits.
+    $DEFAULT_AUTHOR = 'Anonymous <anonymous@wigit>';
+
+    // Set the mappings from HTTP username to Git commit author.
+    $AUTHORS = array(
+        "remko" => "Remko Tronçon <git@el-tramo.be>",
+        "guest" => "Guest <guest@el-tramo.be>"
+    );
+
+    // Extra tags to go in the Header of each page
+    $META_TAGS = "";
+
+    // Footer code , e.g. for analytics
+    $FOOTER_TAGS = "";
 ?>

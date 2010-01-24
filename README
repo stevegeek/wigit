@@ -4,9 +4,9 @@
 
 About
 -----
-WiGit is a simple Wiki written in PHP, using Git (http://git.or.cz/) as 
+WiGit is a simple Wiki written in PHP, using Git (http://git.or.cz/) as
 a backend for tracking changes. Besides Git, this wiki makes use of Textile
-(http://textile.thresholdstate.com/) for marking up text. 
+(http://textile.thresholdstate.com/) for marking up text.
 
 
 Features
@@ -15,7 +15,7 @@ Features
 * Easily customizable using themes
 * Extensive syntax for marking up text (using Textile)
 * Full history tracking support
-* Basic support for users/authors, by using the HTTP authentication headers 
+* Basic support for users/authors, by using the HTTP authentication headers
   to extract the user.
 * Support for pretty URLs (using URL rewriting)
 
@@ -31,26 +31,40 @@ Installation
 ------------
 * Put the WiGit dir in some place where the webserver can find it
 * Make sure there's a 'data' subdir, and that it is writable by the webserver
-* Copy config.php.sample to config.php, and edit config.php to reflect your 
+* Copy config.php.sample to config.php, and edit config.php to reflect your
   local settings
-* Surf to the wigit URL, and you should start by editing the front page
 
-For URL rewriting, change the SCRIPT_URL to be the base URL prefix (as 
-is shown in the config file), and add the necessary URL rewrite rules for
-your webserver. E.g.,
-* For Apache, add the following to .htaccess in your wigit install dir:
-		<IfModule mod_rewrite.c>
-			RewriteEngine On
-			RewriteBase /wigit/
-			RewriteCond %{REQUEST_FILENAME} !-f
-			RewriteRule (.*) /wigit/index.php?r=$1 [L] 
-		</IfModule>
-* For lighttpd, add the following to your config file:
-    url.rewrite-once = (
-        "^/wigit/themes/(.*)" => "$0",
-        "^/wigit(.*)" => "/wigit/index.php?r=$1",
-      )
-(where /wigit is replaced by your own base url)
+* To add a Remote Repo (this must be done before the site is used for the first time):
+  - Enable and set $REMOTE_REPO in config.php
+  - Setup your remote repo , e.g. create a new repo at GitHub.
+  - Setup Authentication for the web server
+    Example For GitHub and Debian:
+       as root:
+        > ssh git@github.com
+        > cat ~/.ssh/known_hosts
+       Copy the first line
+        > mkdir /var/www/.ssh
+        > cat /var/www/.ssh/known_hosts < PASTE IN LINE
+        > ssh-keygen -t rsa -C "AN EMAIL ADDRESS"
+       When prompted for location of id_rsa file , Enter
+          /var/www/.ssh/id_rsa
+       Now set www-data as owner
+        > chown www-data /var/www/.ssh/*
+       Now at the end type
+        > ssh-add /var/www/.ssh/id_rsa
+       If this fails with an error about connecting to the agent first enter:
+        > exec ssh-agent bash
+       then the above command
+
+       Now
+        > cat /var/www/.ssh/id_rsa.pub
+       Copy the resulting data (it is one line but will be wrapped into your console)
+
+       Now goto your Account Settings in Github and add a SSH Public Key and
+       paste in the line copied as above.
+
+
+* Surf to the wigit URL, and you should start by editing the front page
 
 For user support, configure your webserver to require authentication for
 the wigit install dir. E.g.
